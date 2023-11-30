@@ -1,5 +1,5 @@
-import 'package:aoc/aoc.dart' as aoc;
+import 'package:aoc/day0.dart' as aoc;
 
 void main(List<String> arguments) {
-  print('Hello world: ${aoc.calculate()}!');
+  aoc.solve();
 }
