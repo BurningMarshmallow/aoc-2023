@@ -20,15 +20,12 @@ void easy(String fileName) {
 
 int getIdIfPossible(String line) {
   var gameMatch = gameRegex.firstMatch(line)!;
+  var gameId = gameMatch[1]!;
   var cubeSets = parseCubeSets(gameMatch[2]!);
 
-  for (var cubeSet in cubeSets) {
-    if (cubeSet.isImpossible()) {
-      return 0;
-    }
+  if (cubeSets.any((cubeSet) => cubeSet.isImpossible())) {
+    return 0;
   }
-
-  var gameId = gameMatch[1]!;
   return int.parse(gameId);
 }
 
