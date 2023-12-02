@@ -15,13 +15,13 @@ const numbers = {
 
 final numberRegex = RegExp(r'[0-9]|' + numbers.keys.join('|'));
 
-void solve() {
-  solveInternal();
+void solve(String fileName) {
+  solveInternal(fileName);
 }
 
-Future<void> solveInternal() async {
+Future<void> solveInternal(String fileName) async {
   final lines = utf8.decoder
-      .bind(File("input.txt").openRead())
+      .bind(File(fileName).openRead())
       .transform(const LineSplitter());
   var total = await lines.fold(
       0, (prev, element) => prev + getCalibrationValue(element));

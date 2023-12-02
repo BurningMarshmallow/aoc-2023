@@ -1,5 +1,9 @@
-import 'package:aoc/day1.dart' as aoc;
+import 'package:aoc/day2.dart' as aoc;
 
 void main(List<String> arguments) {
-  aoc.solve();
+  print("Sample");
+  aoc.solve("sample.txt");
+  print("-------------------");
+  print("Input");
+  aoc.solve("input.txt");
 }
