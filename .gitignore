@@ -29,4 +29,4 @@ doc/api/
 .DS_Store
 .vscode
 sample.txt
-input.txt
+**/input.txt

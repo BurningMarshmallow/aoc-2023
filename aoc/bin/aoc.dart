@@ -1,4 +1,4 @@
-import 'package:aoc/day5.dart' as aoc;
+import 'package:aoc/day01.dart' as aoc;
 
 void main(List<String> arguments) {
   print("Sample");
