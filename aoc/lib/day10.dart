@@ -102,34 +102,34 @@ List<int> transform(List<String> lines, int nx, int ny, int dx, int dy) {
   }
 
   if (lines[nx][ny] == "L") {
-    if ((dx == 1 && dy == 0)) {
+    if (dx == 1 && dy == 0) {
       [newDx, newDy] = [0, 1];
     }
-    if ((dx == 0 && dy == -1)) {
+    if (dx == 0 && dy == -1) {
       [newDx, newDy] = [-1, 0];
     }
   }
   if (lines[nx][ny] == "J") {
-    if ((dx == 1 && dy == 0)) {
+    if (dx == 1 && dy == 0) {
       [newDx, newDy] = [0, -1];
     }
-    if ((dx == 0 && dy == 1)) {
+    if (dx == 0 && dy == 1) {
       [newDx, newDy] = [-1, 0];
     }
   }
   if (lines[nx][ny] == "7") {
-    if ((dx == -1 && dy == 0)) {
+    if (dx == -1 && dy == 0) {
       [newDx, newDy] = [0, -1];
     }
-    if ((dx == 0 && dy == 1)) {
+    if (dx == 0 && dy == 1) {
       [newDx, newDy] = [1, 0];
     }
   }
   if (lines[nx][ny] == "F") {
-    if ((dx == -1 && dy == 0)) {
+    if (dx == -1 && dy == 0) {
       [newDx, newDy] = [0, 1];
     }
-    if ((dx == 0 && dy == -1)) {
+    if (dx == 0 && dy == -1) {
       [newDx, newDy] = [1, 0];
     }
   }
