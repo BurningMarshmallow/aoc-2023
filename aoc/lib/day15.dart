@@ -51,8 +51,7 @@ void updateLens(Map<int, List<Lens>> hashmap, int hashValue, Lens lens) {
   if (hashmap.containsKey(hashValue)) {
     var idx = hashmap[hashValue]!.indexWhere((x) => x.label == lens.label);
     if (idx != -1) {
-      hashmap[hashValue]!.removeAt(idx);
-      hashmap[hashValue]!.insert(idx, lens);
+      hashmap[hashValue]![idx] = lens;
     } else {
       hashmap[hashValue]!.add(lens);
     }
