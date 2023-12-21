@@ -62,6 +62,7 @@ void solve(String fileName) {
       }
       if (t >= 1000 && toLcm.length == finalInputs.length) {
         if (toLcm.isNotEmpty) {
+          print(toLcm);
           print(toLcm.reduce(leastCommonMultiple));
         } else {
           print("Undefined");
