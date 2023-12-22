@@ -28,7 +28,9 @@ void solve(String fileName) {
   for (var (i, brick) in bricks.indexed) {
     if (canDisintegrate(bricks, i, brick)) {
       numOfSafeDisintegrations++;
-    } 
+    } else {
+      numOfFalling += numOfFallingIfDisintegrate(bricks, i);
+    }
   }
 
   print(numOfSafeDisintegrations);
@@ -91,11 +93,12 @@ int numOfFallingIfDisintegrate(List<Cube> bricks, int i) {
   var newBricks = [for (var (j, cube) in bricks.indexed) if (i != j) cube.clone()];
   var movedBricks = <int>{};
   for (var (k, brick) in newBricks.indexed) {
-    if (isFreeUnder(brick, k, newBricks)) {
-      brick.botLeft.z--;
-      brick.topRight.z--;
-      movedBricks.add(k);
-    }
+    movedBricks.add(k);
+    // if (isFreeUnder(brick, k, newBricks)) {
+    //   brick.botLeft.z--;
+    //   brick.topRight.z--;
+    //   movedBricks.add(k);
+    // }
   }
   return movedBricks.length;
 }
