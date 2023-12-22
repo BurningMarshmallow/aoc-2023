@@ -28,9 +28,7 @@ void solve(String fileName) {
   for (var (i, brick) in bricks.indexed) {
     if (canDisintegrate(bricks, i, brick)) {
       numOfSafeDisintegrations++;
-    } else {
-      numOfFalling += numOfFallingIfDisintegrate(bricks, i);
-    }
+    } 
   }
 
   print(numOfSafeDisintegrations);
