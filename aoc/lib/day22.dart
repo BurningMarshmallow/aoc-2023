@@ -64,15 +64,15 @@ bool canDisintegrate(List<Cube> bricks, int i, Cube brick) {
     }
 
     var numOfSupporting = 0;
-    for (var (k, holder) in bricks.indexed) {
+    for (var (k, supporter) in bricks.indexed) {
       if (j == k) {
         continue;
       }
-      if (holder.topRight.z != other.botLeft.z - 1) {
+      if (supporter.topRight.z != other.botLeft.z - 1) {
         continue;
       }
 
-      var r3 = getRectangle(holder);
+      var r3 = getRectangle(supporter);
       if (r3.intersects(r2)) {
         numOfSupporting++;
         if (numOfSupporting > 1) {
@@ -90,15 +90,17 @@ bool canDisintegrate(List<Cube> bricks, int i, Cube brick) {
 }
 
 int numOfFallingIfDisintegrate(List<Cube> bricks, int i) {
-  var newBricks = [for (var (j, cube) in bricks.indexed) if (i != j) cube.clone()];
+  var newBricks = [
+    for (var (j, cube) in bricks.indexed)
+      if (i != j) cube.clone()
+  ];
   var movedBricks = <int>{};
   for (var (k, brick) in newBricks.indexed) {
-    movedBricks.add(k);
-    // if (isFreeUnder(brick, k, newBricks)) {
-    //   brick.botLeft.z--;
-    //   brick.topRight.z--;
-    //   movedBricks.add(k);
-    // }
+    if (isFreeUnder(brick, k, newBricks)) {
+      brick.botLeft.z--;
+      brick.topRight.z--;
+      movedBricks.add(k);
+    }
   }
   return movedBricks.length;
 }
