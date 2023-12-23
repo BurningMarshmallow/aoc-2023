@@ -1,157 +1,102 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
+import 'package:aoc/utils.dart';
 
 void solve(String fileName) {
   var lines = File(fileName).readAsLinesSync();
-  var bricks = parseBricks(lines);
 
-  bricks.sort((x, y) => x.botLeft.z == y.botLeft.z
-      ? x.topRight.z.compareTo(y.topRight.z)
-      : x.botLeft.z.compareTo(y.botLeft.z));
+  var (n, m) = (lines.length, lines[0].length);
+  var (sx, sy) = (0, 1);
+  var (ex, ey) = (n - 1, m - 2);
 
-  var isMoving = true;
-  while (isMoving) {
-    isMoving = false;
-    for (var (i, brick) in bricks.indexed) {
-      while (isFreeUnder(brick, i, bricks)) {
-        brick.botLeft.z--;
-        brick.topRight.z--;
-        isMoving = true;
-      }
-    }
-  }
-
-  print("Initial simulation is over");
-
-  var numOfSafeDisintegrations = 0;
-  var numOfFalling = 0;
-  for (var (i, brick) in bricks.indexed) {
-    if (canDisintegrate(bricks, i, brick)) {
-      numOfSafeDisintegrations++;
-    } else {
-      numOfFalling += numOfFallingIfDisintegrate(bricks, i);
-    }
-  }
-
-  print(numOfSafeDisintegrations);
-  print(numOfFalling);
+  longestHike(n, m, lines, sx, sy, ex, ey, true);
+  longestHike(n, m, lines, sx, sy, ex, ey, false);
 }
 
-List<Cube> parseBricks(List<String> lines) {
-  var bricks = <Cube>[];
-  for (var line in lines) {
-    var parts = line.split("~");
-    var [lx, ly, lz] = parts[0].split(",").map(int.parse).toList();
-    var [rx, ry, rz] = parts[1].split(",").map(int.parse).toList();
-
-    bricks.add(Cube(V(lx, ly, lz), V(rx, ry, rz)));
+void longestHike(
+    int n, int m, List<String> lines, int sx, int sy, int ex, int ey, bool easy) {
+  var crossroads = <V>[];
+  var arrowsToDir = Map<String, (int, int)>.from(
+      {">": (0, 1), "v": (1, 0), "<": (0, -1), "^": (-1, 0)});
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < m; j++) {
+      var neighbours = 0;
+      for (var [nx, ny] in neighbours4([i, j], n, m)) {
+        if (lines[nx][ny] != "#") {
+          neighbours++;
+        }
+      }
+      if (lines[i][j] == "." && neighbours > 2) {
+        crossroads.add((i, j));
+      }
+    }
   }
-  return bricks;
-}
 
-bool canDisintegrate(List<Cube> bricks, int i, Cube brick) {
-  for (var (j, other) in bricks.indexed) {
-    if (i == j) {
-      continue;
-    }
-    if (brick.topRight.z != other.botLeft.z - 1) {
-      continue;
-    }
-    var r1 = getRectangle(brick);
-    var r2 = getRectangle(other);
-    if (!r1.intersects(r2)) {
-      continue;
-    }
+  var adj = <V, Map<V, int>>{};
+  var q = DoubleLinkedQueue<(int, int, int)>.from([]);
+  var vis = <V>{};
 
-    var numOfSupporting = 0;
-    for (var (k, supporter) in bricks.indexed) {
-      if (j == k) {
-        continue;
-      }
-      if (supporter.topRight.z != other.botLeft.z - 1) {
-        continue;
-      }
+  var vertices = [(sx, sy)] + crossroads + [(ex, ey)];
+  for (var u in vertices) {
+    q.add((u.$1, u.$2, 0));
+    while (q.isNotEmpty) {
+      var state = q.removeFirst();
+      var (x, y, steps) = state;
+      for (var [nx, ny, dx, dy] in neighbours4WithDiff([x, y], n, m)) {
+        if (lines[nx][ny] == "#") {
+          continue;
+        }
+        if (easy && arrowsToDir.containsKey(lines[nx][ny])) {
+          var diff = arrowsToDir[lines[nx][ny]]!;
+          if (dx != diff.$1 || dy != diff.$2) {
+            continue;
+          }
+        }
+        if (vertices.contains((nx, ny)) && u != (nx, ny)) {
+          if (!adj.containsKey(u)) {
+            adj[u] = <V, int>{};
+          }
+          adj[u]![(nx, ny)] = steps + 1;
 
-      var r3 = getRectangle(supporter);
-      if (r3.intersects(r2)) {
-        numOfSupporting++;
-        if (numOfSupporting > 1) {
-          break;
+          if (!easy) {
+            var v = (nx, ny);
+            if (!adj.containsKey(v)) {
+              adj[v] = <V, int>{};
+            }
+            adj[v]![u] = steps + 1;
+          }
+        } else {
+          var newState = (nx, ny, steps + 1);
+          if (!vis.contains((nx, ny))) {
+            vis.add((nx, ny));
+            q.add(newState);
+          }
         }
       }
     }
+  }
 
-    if (numOfSupporting == 1) {
-      return false;
+  var currMax = -1;
+  var maxDist = getMaxDist(currMax, 0, (sx, sy), adj, (ex, ey), []);
+  print(maxDist);
+}
+
+int getMaxDist(int currMax, int currDist, V curr, Map<V, Map<V, int>> adj,
+    (int, int) end, List<V> path) {
+  if (curr == end) {
+    return currDist;
+  }
+  for (var y in adj[curr]!.keys) {
+    if (!path.contains(y)) {
+      currMax = max(
+          currMax,
+          getMaxDist(
+              currMax, currDist + adj[curr]![y]!, y, adj, end, path + [y]));
     }
   }
 
-  return true;
+  return currMax;
 }
 
-int numOfFallingIfDisintegrate(List<Cube> bricks, int i) {
-  var newBricks = [
-    for (var (j, cube) in bricks.indexed)
-      if (i != j) cube.clone()
-  ];
-  var movedBricks = <int>{};
-  for (var (k, brick) in newBricks.indexed) {
-    if (isFreeUnder(brick, k, newBricks)) {
-      brick.botLeft.z--;
-      brick.topRight.z--;
-      movedBricks.add(k);
-    }
-  }
-  return movedBricks.length;
-}
-
-bool isFreeUnder(Cube brick, int i, List<Cube> bricks) {
-  if (brick.botLeft.z == 1) {
-    return false;
-  }
-  for (var (j, other) in bricks.indexed) {
-    if (i == j) {
-      continue;
-    }
-    if (other.topRight.z != brick.botLeft.z - 1) {
-      continue;
-    }
-
-    var r1 = getRectangle(brick);
-    var r2 = getRectangle(other);
-    if (r1.intersects(r2)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-Rectangle getRectangle(Cube brick) {
-  return Rectangle.fromPoints(Point(brick.botLeft.x, brick.botLeft.y),
-      Point(brick.topRight.x, brick.topRight.y));
-}
-
-class V {
-  V(this.x, this.y, this.z);
-  int x, y, z;
-
-  @override
-  String toString() {
-    return "($x,$y,$z)";
-  }
-
-  V clone() => V(x, y, z);
-}
-
-class Cube {
-  Cube(this.botLeft, this.topRight);
-  V botLeft, topRight;
-
-  @override
-  String toString() {
-    return "[$botLeft, $topRight]";
-  }
-
-  Cube clone() => Cube(botLeft.clone(), topRight.clone());
-}
+typedef V = (int x, int y);
